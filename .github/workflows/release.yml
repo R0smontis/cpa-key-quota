@@ -37,7 +37,8 @@ jobs:
           so="key-quota-v${v}.so"
           asset="key-quota-v${v}_linux_${{ matrix.arch }}.so"
           mkdir -p dist
-          go build -trimpath -buildmode=c-shared \
+          # The container's git refuses the runner-owned checkout, so skip VCS stamping.
+          go build -trimpath -buildvcs=false -buildmode=c-shared \
             -ldflags "-s -w -X main.pluginVersion=${v}" \
             -o "dist/${so}" .
           echo "max required: $(objdump -T "dist/${so}" | grep -oE 'GLIBC_[0-9.]+' | sort -Vu | tail -1)"
