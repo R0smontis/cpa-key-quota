@@ -19,7 +19,7 @@ const (
 	minimumRPCSchemaVersion uint32 = 2
 )
 
-var pluginVersion = "0.1.1"
+var pluginVersion = "0.1.2"
 
 func main() {}
 

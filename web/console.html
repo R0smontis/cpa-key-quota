@@ -4,116 +4,266 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light">
 <title>Key 配额</title>
 <style nonce="{{NONCE}}">
-:root{--bg:#f6f7f8;--panel:#fff;--panel2:#eef0f2;--ink:#16181b;--dim:#5f656d;--line:#dde1e5;--accent:#1f6feb;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--bar:#e4e7eb}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--panel:#171a20;--panel2:#1f232b;--ink:#e8eaed;--dim:#9aa1ab;--line:#2b313a;--accent:#4c8dff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--bar:#2b313a}}
-:root.dark{--bg:#0f1115;--panel:#171a20;--panel2:#1f232b;--ink:#e8eaed;--dim:#9aa1ab;--line:#2b313a;--accent:#4c8dff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--bar:#2b313a}
-:root.light{--bg:#f6f7f8;--panel:#fff;--panel2:#eef0f2;--ink:#16181b;--dim:#5f656d;--line:#dde1e5;--accent:#1f6feb;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--bar:#e4e7eb}
+:root{
+  --ground:#faf9f5;--surface:#fff;--raised:#f5f4ee;--active:#efede4;
+  --border:#e6e2d6;--rule:#efece3;--control:#d7d2c4;
+  --text:#141413;--muted:#5e5d58;--faint:#7c7a72;
+  --primary:#141413;--accent:#c96442;--accent-ink:#a4492b;--accent-soft:#f6e8e1;
+  --warn:#c4892a;--warn-soft:#fbf1dc;--warn-ink:#7d5410;
+  --bad:#b8392f;--bad-soft:#fbe9e6;--bad-ink:#8c2219;
+  --bar:#ece9e0;
+  --r-card:10px;--r-ctl:7px;--r-chip:5px;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --serif:"Songti SC","Noto Serif SC","Source Han Serif SC","STSong",Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
-main{max-width:1180px;margin:0 auto;padding:24px 20px 64px}
-h1{font-size:22px;margin:0}h2{font-size:16px;margin:0}
-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-header .sp{flex:1}
+html{background:var(--ground)}
+body{margin:0;color:var(--text);font:14px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:1280px;margin:0 auto;padding:32px 28px 72px}
+h1,h2,h3{margin:0;font-weight:600}
+h1{font:600 26px/1.2 var(--serif);letter-spacing:-.01em}
+h2{font:600 20px/1.3 var(--serif)}
+h3{font-size:14px;font-weight:600}
 button,input,select{font:inherit;color:inherit}
-button{border:1px solid var(--line);background:var(--panel);padding:6px 12px;border-radius:6px;cursor:pointer}
-button:hover{background:var(--panel2)}
-button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-button.danger{color:var(--bad)}
-button:disabled{opacity:.5;cursor:default}
-input,select{border:1px solid var(--line);background:var(--panel);padding:6px 8px;border-radius:6px;min-width:0}
-input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.tabs{display:flex;gap:4px;margin-bottom:16px}
-.tabs button{border-radius:6px}
-.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px}
-.list{max-height:calc(100vh - 170px);overflow:auto}
-.list input{margin:10px;width:calc(100% - 20px)}
-.key{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);border-radius:0;padding:10px 14px;background:none}
-.key[aria-current=true]{background:var(--panel2)}
-.key b{display:block;font-weight:600}
-.key small{color:var(--dim)}
-.tag{display:inline-block;font-size:12px;padding:0 6px;border-radius:4px;background:var(--panel2);color:var(--dim);margin-left:6px}
-.tag.own{color:var(--accent)}.tag.off{color:var(--bad)}
-.detail{padding:18px}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.field{display:grid;gap:4px;margin:14px 0}
-.field>span{color:var(--dim);font-size:13px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.chip{display:inline-flex;align-items:center;gap:4px;background:var(--panel2);border-radius:5px;padding:2px 4px 2px 8px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
-.chip button{border:0;background:none;padding:0 4px;line-height:1}
-table{width:100%;border-collapse:collapse}
-th,td{text-align:left;padding:8px 6px;border-top:1px solid var(--line);vertical-align:middle}
-th{color:var(--dim);font-weight:500;font-size:13px;border-top:0}
-td input,td select{width:100%}
-td.n{width:110px}td.act{width:1%;white-space:nowrap}
-.grow{flex:1}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.my8{margin:8px 0}.small{font-size:12px}.chips input{min-width:220px}
-.meter{height:6px;background:var(--bar);border-radius:3px;overflow:hidden;min-width:80px}
-.meter i{display:block;height:100%;background:var(--ok)}
-.meter i.warn{background:var(--warn)}.meter i.bad{background:var(--bad)}
-.usage{font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
-.muted{color:var(--dim)}
-.bar{position:sticky;bottom:0;display:flex;gap:10px;justify-content:flex-end;align-items:center;padding:12px 18px;border-top:1px solid var(--line);background:var(--panel);border-radius:0 0 10px 10px}
-.toast{position:fixed;right:20px;bottom:20px;padding:10px 14px;border-radius:8px;background:var(--ink);color:var(--bg);max-width:420px}
-.toast.bad{background:var(--bad);color:#fff}
-.login{max-width:420px;margin:12vh auto;padding:24px}
-.login .row{margin-top:12px}.login input{flex:1}
-.err{color:var(--bad)}
-.stats{display:flex;gap:24px;margin:6px 0 4px;color:var(--dim);font-size:13px}
-.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:12.5px}
+.muted{color:var(--muted)}
+.grow{flex:1}
 [hidden]{display:none!important}
-@media (max-width:820px){.layout{grid-template-columns:1fr}.list{max-height:none}}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* controls */
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:1px solid var(--control);border-radius:var(--r-ctl);background:var(--surface);cursor:pointer;white-space:nowrap;transition:background-color .12s,border-color .12s}
+.btn:hover{background:var(--raised)}
+.btn:active{background:var(--active)}
+.btn:disabled{opacity:.4;cursor:default;background:var(--surface)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#faf9f5}
+.btn.primary:hover{background:#2c2b28}
+.btn.primary:disabled{background:var(--primary);opacity:.22}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--active);color:var(--text)}
+.btn.sm{height:28px;padding:0 10px;font-size:13px}
+.btn.danger{color:var(--bad-ink)}
+.btn.danger-solid{background:var(--bad);border-color:var(--bad);color:#fff}
+input[type=text],input[type=number],input[type=password],input[type=search],select{height:34px;border:1px solid var(--control);border-radius:var(--r-ctl);background:var(--surface);padding:0 10px;min-width:0;outline:none;transition:border-color .12s,box-shadow .12s}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input::placeholder{color:var(--faint)}
+/* One custom chevron so the label never runs into the native arrow. */
+select{appearance:none;padding-right:28px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237c7a72' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.switch input{appearance:none;width:34px;height:20px;border-radius:10px;background:var(--control);position:relative;margin:0;cursor:pointer;transition:background-color .15s}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch input:checked{background:var(--primary)}
+.switch input:checked::after{transform:translateX(14px)}
+
+/* shell */
+.top{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.mark{width:26px;height:26px;flex:none}
+.stamp{font-size:12.5px;color:var(--faint)}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);margin-bottom:22px}
+.summary>div{padding:14px 20px}
+.summary>div+div{border-left:1px solid var(--rule)}
+.summary span{display:block;font-size:12.5px;color:var(--muted)}
+.summary b{display:block;font:500 24px/1.3 var(--sans);font-variant-numeric:tabular-nums;margin-top:2px}
+.summary b.hot{color:var(--accent-ink)}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tabs button{border:0;background:none;padding:0 0 10px;margin-bottom:-1px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
+.tabs button:hover{color:var(--text)}
+.tabs button[aria-selected=true]{color:var(--text);border-bottom-color:var(--text)}
+.tabs em{font-style:normal;color:var(--faint);margin-left:5px;font-variant-numeric:tabular-nums}
+
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);min-width:0}
+.list{position:sticky;top:20px;max-height:calc(100vh - 40px);display:flex;flex-direction:column;overflow:hidden}
+.list .search{padding:12px;border-bottom:1px solid var(--rule)}
+.list .search input{width:100%}
+.list .rows{overflow:auto}
+.key{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--rule)}
+.key:last-child{border-bottom:0}
+.key:hover{background:var(--raised)}
+.key[aria-current=true]{background:var(--active);box-shadow:inset 2px 0 0 var(--text)}
+.key .name{font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key .sub{grid-column:1;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key .use{grid-row:1/span 2;grid-column:2;display:grid;justify-items:end;gap:5px;font-size:12.5px;color:var(--muted)}
+.key .use .gauge{width:56px}
+.empty-list{padding:28px 16px;color:var(--muted);text-align:center}
+
+.pill{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:12px;font-weight:500;background:var(--raised);color:var(--muted);white-space:nowrap}
+.pill.own{background:var(--accent-soft);color:var(--accent-ink)}
+.pill.off{background:var(--bad-soft);color:var(--bad-ink)}
+.pill.warn{background:var(--warn-soft);color:var(--warn-ink)}
+
+.gauge{height:5px;border-radius:3px;background:var(--bar);overflow:hidden}
+.gauge i{display:block;height:100%;width:0;border-radius:3px;background:var(--accent);transition:width .3s}
+.gauge i.warn{background:var(--warn)}
+.gauge i.bad{background:var(--bad)}
+
+/* detail */
+.head{display:flex;align-items:flex-start;gap:16px;padding:22px 24px 18px}
+.head .who{min-width:0;flex:1}
+.head .who .line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.head .who span.mono{display:block;color:var(--muted);margin-top:4px}
+/* A key with no label is titled by its masked value: mono, but at heading size. */
+h2.mono{font:600 17px/1.3 var(--mono);letter-spacing:0}
+.head .acts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.stats>div{padding:12px 24px}
+.stats>div+div{border-left:1px solid var(--rule)}
+.stats span{display:block;font-size:12.5px;color:var(--muted)}
+.stats b{display:block;font-weight:500;font-size:15px;font-variant-numeric:tabular-nums;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sec{padding:20px 24px;border-bottom:1px solid var(--rule)}
+.sec:last-of-type{border-bottom:0}
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sec-head .unit{font-size:12.5px;color:var(--faint)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.base{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end}
+.field{display:grid;gap:6px}
+.field>span{font-size:12.5px;color:var(--muted)}
+.field input[type=text]{width:100%}
+.state-line{display:flex;align-items:center;gap:10px;color:var(--muted)}
+
+.tokens{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px;padding:5px 6px;border:1px solid var(--control);border-radius:var(--r-ctl);background:var(--surface);cursor:text;transition:border-color .12s,box-shadow .12s}
+.tokens:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.tokens input{border:0!important;box-shadow:none!important;height:28px;padding:0 4px;flex:1;min-width:150px;background:transparent}
+.chip{display:inline-flex;align-items:center;gap:2px;height:26px;padding:0 2px 0 8px;border-radius:var(--r-chip);background:var(--raised);border:1px solid var(--rule);font-family:var(--mono);font-size:12.5px}
+.chip button{border:0;background:none;width:20px;height:20px;border-radius:4px;color:var(--faint);cursor:pointer;line-height:1;font-size:15px}
+.chip button:hover{background:var(--active);color:var(--text)}
+
+.tbl{overflow-x:auto;margin:0 -24px;padding:0 24px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{font-size:12.5px;font-weight:500;color:var(--muted);text-align:left;padding:0 8px 8px;white-space:nowrap}
+td{padding:10px 8px;border-top:1px solid var(--rule);vertical-align:middle}
+th:first-child,td:first-child{padding-left:0}
+th:last-child,td:last-child{padding-right:0}
+td select,td input{width:100%}
+/* Limits, at the 834px detail width of a 1280px page: metric 116 + window 104 + max 150
+   + used 176 + actions 128 = 674, leaving ~160px for models. Below 900px the table
+   scrolls inside .tbl instead. */
+.limits col.metric{width:116px}.limits col.window{width:104px}.limits col.max{width:150px}
+.limits col.used{width:176px}.limits col.act{width:128px}.limits col.act.narrow{width:64px}
+.limits.ro col.used{width:auto}
+.limits.ro .usage{max-width:320px}
+td.act .btn.sm{padding:0 6px}
+/* Prices: model flex · four prices 128 each · actions 72 */
+.prices col.p{width:128px}.prices col.act{width:72px}
+td.act{text-align:right;white-space:nowrap}
+/* The unit sits beside the number, not over it, so long limits stay readable. */
+.with-unit{display:flex;align-items:center;gap:6px}
+.with-unit input{flex:1;min-width:0;padding:0 8px}
+.with-unit em{flex:none;width:34px;font-style:normal;font-size:12px;line-height:1;color:var(--faint)}
+/* Spinners eat ~16px of a narrow numeric cell and nobody steps a limit by 1. */
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#dlgInput{-moz-appearance:auto}
+.usage{min-width:0}
+.usage .fig{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-variant-numeric:tabular-nums;margin-bottom:5px;white-space:nowrap}
+.usage .fig b{font-weight:500}
+.usage .reset{font-size:12px;color:var(--faint);margin-top:4px;white-space:nowrap}
+.none{color:var(--faint);padding:14px 0}
+
+.savebar{display:flex;align-items:center;gap:8px;padding:14px 24px;border-top:1px solid var(--border);background:var(--raised);border-radius:0 0 var(--r-card) var(--r-card)}
+.dirty{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--accent-ink)}
+.dirty::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+.cta{padding:20px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+/* login, dialog, toast */
+.login{max-width:400px;margin:16vh auto 0;padding:32px}
+.login .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.login form,.login .row{display:flex;gap:8px}
+.login input{flex:1}
+.err{color:var(--bad-ink);font-size:13px;margin:12px 0 0}
+dialog{border:1px solid var(--border);border-radius:12px;padding:24px;width:min(400px,calc(100vw - 32px));box-shadow:0 12px 40px rgba(20,20,19,.14);color:var(--text)}
+dialog::backdrop{background:rgba(20,20,19,.28)}
+dialog p{margin:0 0 16px;line-height:1.6}
+dialog input{width:100%;margin-bottom:16px}
+.dlg-acts{display:flex;justify-content:flex-end;gap:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 16px;border-radius:9px;background:var(--primary);color:#faf9f5;font-size:13.5px;box-shadow:0 8px 24px rgba(20,20,19,.18);max-width:min(480px,calc(100vw - 32px))}
+.toast.bad{background:var(--bad)}
+
+@media (max-width:900px){
+  main{padding:20px 16px 56px}
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .list{position:static;max-height:340px}
+  #app,.layout>*{min-width:0}
+  .summary,.stats{grid-template-columns:1fr 1fr}
+  .summary>div:nth-child(3),.stats>div:nth-child(3){border-left:0}
+  .summary>div:nth-child(n+3),.stats>div:nth-child(n+3){border-top:1px solid var(--rule)}
+  .cols,.base{grid-template-columns:1fr}
+  .head{flex-direction:column}
+  .head .acts{justify-content:flex-start}
+  /* Tables keep their columns and scroll inside .tbl; the page never scrolls sideways. */
+  table.limits{min-width:880px}
+  table.limits.ro{min-width:560px}
+  table.prices{min-width:720px}
+  .sec,.head,.savebar,.cta{padding-left:16px;padding-right:16px}
+  .tbl{margin:0 -16px;padding:0 16px}
+  .stats>div,.summary>div{padding:12px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" aria-hidden="true">
+  <symbol id="mk" viewBox="0 0 26 26">
+    <rect width="26" height="26" rx="7" fill="#141413"/>
+    <path d="M6.5 16.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="#5e5d58" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M6.5 16.5a6.5 6.5 0 0 1 9.6-5.7" fill="none" stroke="#c96442" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="13" cy="16.5" r="1.7" fill="#faf9f5"/>
+  </symbol>
+</svg>
 <main>
   <section id="login" class="panel login" hidden>
-    <h1>Key 配额</h1>
+    <div class="brand"><svg class="mark"><use href="#mk"/></svg><h1>Key 配额</h1></div>
     <div class="row">
       <input id="mgmt" type="password" autocomplete="off" placeholder="管理密钥" aria-label="管理密钥">
-      <button id="connect" class="primary" type="button">连接</button>
+      <button id="connect" class="btn primary" type="button">连接</button>
     </div>
     <p id="loginErr" class="err" hidden></p>
   </section>
 
   <section id="app" hidden>
-    <header>
+    <div class="top">
+      <svg class="mark" aria-hidden="true"><use href="#mk"/></svg>
       <h1>Key 配额</h1>
-      <span class="sp"></span>
-      <button id="reload" type="button">刷新</button>
-    </header>
+      <span class="grow"></span>
+      <span class="stamp" id="stamp"></span>
+      <button id="reload" class="btn sm" type="button">刷新</button>
+    </div>
+
+    <div class="summary" id="summary"></div>
+
     <div class="tabs" role="tablist">
-      <button role="tab" data-tab="keys" aria-selected="true" type="button">Key</button>
+      <button role="tab" data-tab="keys" aria-selected="true" type="button">Key<em id="nKeys"></em></button>
       <button role="tab" data-tab="default" aria-selected="false" type="button">默认策略</button>
-      <button role="tab" data-tab="pricing" aria-selected="false" type="button">模型价格</button>
+      <button role="tab" data-tab="pricing" aria-selected="false" type="button">模型价格<em id="nPrices"></em></button>
     </div>
 
     <div id="tab-keys" class="layout">
       <div class="panel list">
-        <input id="filter" type="search" placeholder="筛选" aria-label="筛选 Key">
-        <div id="keyList"></div>
+        <div class="search"><input id="filter" type="search" placeholder="筛选" aria-label="筛选 Key"></div>
+        <div class="rows" id="keyList"></div>
       </div>
       <div class="panel" id="keyPanel"></div>
     </div>
 
     <div id="tab-default" class="panel" hidden></div>
-
-    <div id="tab-pricing" class="panel" hidden>
-      <div class="detail">
-        <h2>模型价格</h2>
-        <p class="muted">USD / 百万 Token</p>
-        <table>
-          <thead><tr><th>模型</th><th>输入</th><th>输出</th><th>缓存读取</th><th>缓存写入</th><th></th></tr></thead>
-          <tbody id="priceRows"></tbody>
-        </table>
-        <div class="row mt12"><button id="addPrice" type="button">添加</button></div>
-      </div>
-      <div class="bar"><button id="savePricing" class="primary" type="button">保存</button></div>
-    </div>
+    <div id="tab-pricing" class="panel" hidden></div>
   </section>
 </main>
+
+<dialog id="dlg">
+  <p id="dlgMsg"></p>
+  <input id="dlgInput" type="number" min="0" step="any" aria-label="数值">
+  <div class="dlg-acts">
+    <button type="button" class="btn" id="dlgCancel">取消</button>
+    <button type="button" class="btn primary" id="dlgOk">确定</button>
+  </div>
+</dialog>
 <div id="toast" class="toast" role="status" hidden></div>
 
 <script nonce="{{NONCE}}">
@@ -121,16 +271,13 @@ td.n{width:110px}td.act{width:1%;white-space:nowrap}
 (() => {
   const API = "/v0/management/plugins/key-quota";
   const $ = (id) => document.getElementById(id);
-  const S = { token: "", keys: [], config: null, revision: 0, views: {}, models: [], current: null, draft: null, tab: "keys" };
-  const METRIC = { requests: "请求次数", tokens: "Token", cost: "金额 (USD)" };
+  const S = {
+    token: "", keys: [], config: null, revision: 0, views: {}, models: [], current: null,
+    draft: null, dirty: false, defDraft: null, defOn: false, defDirty: false, prices: null, priceDirty: false, tab: "keys",
+  };
+  const METRIC = { requests: "请求次数", tokens: "Token", cost: "金额" };
+  const UNIT = { requests: "次", tokens: "Token", cost: "USD" };
   const WINDOW = { total: "累计", hour: "每小时", day: "每天", week: "每周", month: "每月" };
-
-  // Theme follows CPAMC when embedded.
-  try {
-    const th = localStorage.getItem("cli-proxy-theme");
-    const v = th && (JSON.parse(th)?.state?.theme ?? th);
-    if (v === "dark" || v === "light") document.documentElement.classList.add(v);
-  } catch (_) {}
 
   // CPAMC stores the management key as reversible XOR obfuscation (enc::v2 drops
   // the UA from the key; enc::v1 is the legacy form).
@@ -175,7 +322,7 @@ td.n{width:110px}td.act{width:1%;white-space:nowrap}
   function mask(k) {
     if (k.length < 8) return "••••••";
     if (k.length < 16) return k.slice(0, 2) + "••••" + k.slice(-2);
-    const p = (/^[A-Za-z]{2,4}-/.exec(k) || [""])[0];
+    const p = (/^[A-Za-z]{2,4}[-_]/.exec(k) || [""])[0];
     return k.slice(0, p.length + 4) + "••••" + k.slice(-4);
   }
 
@@ -202,157 +349,81 @@ td.n{width:110px}td.act{width:1%;white-space:nowrap}
     return out;
   }
 
-  async function refresh(keepCurrent) {
-    S.keys = await loadKeys();
-    const st = await api(API + "/state", { method: "POST", body: { scopes: S.keys.map((k) => k.scope) } });
-    S.config = st.config; S.revision = st.revision; S.views = st.keys || {};
-    if (!S.config.policies) S.config.policies = {};
-    if (!S.config.pricing) S.config.pricing = [];
-    // Policies whose key no longer exists stay listed so they are never lost silently.
-    for (const scope of Object.keys(S.config.policies)) {
-      if (!S.keys.some((k) => k.scope === scope)) S.keys.push({ scope, mask: "已删除的 Key", stale: true });
-    }
-    if (!keepCurrent || !S.keys.some((k) => k.scope === S.current)) S.current = S.keys[0]?.scope || null;
-    S.draft = null;
-    renderList(); renderKey(); renderDefault(); renderPricing();
-  }
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const fmt = (n, metric) => metric === "cost" ? "$" + (+n).toFixed(n !== 0 && Math.abs(n) < 1 ? 4 : 2) : Math.round(n).toLocaleString();
+  // Compact form for the usage figures, where both ends must fit one line: 4,123万, 1.2亿.
+  const short = (n, metric) => {
+    if (metric === "cost") return fmt(n, metric);
+    const a = Math.abs(n);
+    if (a >= 1e8) return +(n / 1e8).toFixed(a >= 1e9 ? 0 : 2) + "亿";
+    if (a >= 1e5) return Math.round(n / 1e4).toLocaleString() + "万";
+    return Math.round(n).toLocaleString();
+  };
+  const ratio = (l) => l.max > 0 ? l.used / l.max : (l.used > 0 ? 1 : 0);
+  const level = (r) => r >= 1 ? "bad" : r >= 0.8 ? "warn" : "";
+  const when = (d) => d.toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  const hm = (d) => d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  const nameOf = (k) => S.config.policies[k.scope]?.label || k.mask;
+  const peak = (v) => (v?.limits || []).reduce((m, l) => Math.max(m, ratio(l)), 0);
+  const gauge = (r) => '<div class="gauge"><i class="' + level(r) + '" data-pct="' + Math.min(100, r * 100) + '"></i></div>';
+  // CSP forbids inline style attributes; widths go through CSSOM.
+  const paint = (root) => root.querySelectorAll("[data-pct]").forEach((el) => el.style.setProperty("width", el.dataset.pct + "%"));
 
+  // ---- dialog, toast ----
+  const dlg = $("dlg");
+  function ask(message, { value, ok = "确定", danger = false } = {}) {
+    return new Promise((resolve) => {
+      $("dlgMsg").textContent = message;
+      const inp = $("dlgInput");
+      inp.hidden = value === undefined;
+      if (value !== undefined) inp.value = value;
+      const okBtn = $("dlgOk");
+      okBtn.textContent = ok;
+      okBtn.className = "btn " + (danger ? "danger-solid" : "primary");
+      const done = (v) => { dlg.close(); cleanup(); resolve(v); };
+      const onOk = () => done(value === undefined ? true : inp.value);
+      const onCancel = () => done(null);
+      const onKey = (e) => { if (e.key === "Enter" && value !== undefined) { e.preventDefault(); onOk(); } };
+      const onClose = () => { cleanup(); resolve(null); };
+      function cleanup() {
+        okBtn.removeEventListener("click", onOk);
+        $("dlgCancel").removeEventListener("click", onCancel);
+        inp.removeEventListener("keydown", onKey);
+        dlg.removeEventListener("cancel", onClose);
+      }
+      okBtn.addEventListener("click", onOk);
+      $("dlgCancel").addEventListener("click", onCancel);
+      inp.addEventListener("keydown", onKey);
+      dlg.addEventListener("cancel", onClose);
+      dlg.showModal();
+      if (value !== undefined) { inp.focus(); inp.select(); } else okBtn.focus();
+    });
+  }
   function toast(msg, bad) {
     const t = $("toast");
     t.textContent = msg; t.className = "toast" + (bad ? " bad" : ""); t.hidden = false;
     clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), bad ? 5000 : 2200);
   }
+  const anyDirty = () => S.dirty || S.defDirty || S.priceDirty;
+  const leaveOk = async () => !anyDirty() || !!(await ask("有未保存的修改，确定放弃？", { ok: "放弃修改", danger: true }));
 
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const fmt = (n, metric) => metric === "cost" ? "$" + (+n).toFixed(n < 1 ? 4 : 2) : Math.round(n).toLocaleString();
-  const clone = (o) => JSON.parse(JSON.stringify(o));
-
-  function renderList() {
-    const q = $("filter").value.trim().toLowerCase();
-    const list = $("keyList");
-    list.innerHTML = "";
-    for (const k of S.keys) {
-      const p = S.config.policies[k.scope];
-      const label = p?.label || k.mask;
-      if (q && !(label + " " + k.mask).toLowerCase().includes(q)) continue;
-      const v = S.views[k.scope];
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "key";
-      b.setAttribute("aria-current", String(k.scope === S.current));
-      const tag = p ? (p.disabled ? '<span class="tag off">停用</span>' : '<span class="tag own">独立策略</span>') : (S.config.default ? '<span class="tag">默认策略</span>' : "");
-      b.innerHTML = "<b>" + esc(label) + tag + "</b><small>" + esc(p?.label ? k.mask : "") + (v?.totals?.requests ? (p?.label ? " · " : "") + v.totals.requests.toLocaleString() + " 次请求" : "") + "</small>";
-      b.addEventListener("click", () => {
-        if (S.draft && !confirm("放弃未保存的修改？")) return;
-        S.current = k.scope; S.draft = null; renderList(); renderKey();
-      });
-      list.appendChild(b);
+  // ---- data ----
+  async function refresh(keepCurrent) {
+    S.keys = await loadKeys();
+    const st = await api(API + "/state", { method: "POST", body: { scopes: S.keys.map((k) => k.scope) } });
+    S.config = st.config; S.revision = st.revision; S.views = st.keys || {};
+    S.config.policies ||= {};
+    S.config.pricing ||= [];
+    // Policies whose key no longer exists stay listed so they are never lost silently.
+    for (const scope of Object.keys(S.config.policies)) {
+      if (!S.keys.some((k) => k.scope === scope)) S.keys.push({ scope, mask: "已删除的 Key", stale: true });
     }
-  }
-
-  function modelPicker(container, list, onChange) {
-    container.innerHTML = "";
-    const chips = document.createElement("div"); chips.className = "chips";
-    list.forEach((m, i) => {
-      const c = document.createElement("span"); c.className = "chip"; c.textContent = m;
-      const x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "移除 " + m);
-      x.addEventListener("click", () => { list.splice(i, 1); onChange(); });
-      c.appendChild(x); chips.appendChild(c);
-    });
-    const input = document.createElement("input");
-    input.placeholder = "模型名或通配符，如 gpt-6*"; input.setAttribute("list", "models");
-    const add = () => { const v = input.value.trim(); if (v && !list.includes(v)) { list.push(v); onChange(); } else input.value = ""; };
-    input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } });
-    input.addEventListener("change", add);
-    chips.appendChild(input);
-    container.appendChild(chips);
-  }
-
-  function ensureDatalist() {
-    let dl = $("models");
-    if (!dl) { dl = document.createElement("datalist"); dl.id = "models"; document.body.appendChild(dl); }
-    dl.innerHTML = ["*", ...S.models].map((m) => '<option value="' + esc(m) + '">').join("");
-  }
-
-  // Renders the editor for one policy. `live` maps limit id -> {used, resets_at}.
-  function policyEditor(root, policy, live, opts) {
-    ensureDatalist();
-    root.innerHTML = "";
-    const wrap = document.createElement("div"); wrap.className = "detail";
-    wrap.innerHTML =
-      '<div class="row"><h2 class="grow">' + esc(opts.title) + "</h2>" + (opts.headerExtra || "") + "</div>" +
-      (opts.stats || "") +
-      (opts.withLabel ? '<label class="field"><span>备注名</span><input data-f="label" maxlength="80"></label>' : "") +
-      (opts.withLabel ? '<label class="row my8"><input type="checkbox" data-f="disabled"> 停用此 Key</label>' : "") +
-      '<div class="field"><span>允许的模型（留空表示全部）</span><div data-f="allow"></div></div>' +
-      '<div class="field"><span>禁止的模型</span><div data-f="deny"></div></div>' +
-      '<div class="field"><span>用量限制</span><table><thead><tr><th>指标</th><th>周期</th><th>上限</th><th>适用模型</th><th>已用</th><th></th></tr></thead><tbody data-f="limits"></tbody></table>' +
-      '<div class="row mt8"><button type="button" data-f="addLimit">添加限制</button></div></div>';
-    root.appendChild(wrap);
-    const bar = document.createElement("div"); bar.className = "bar";
-    bar.innerHTML = (opts.barExtra || "") + '<span class="muted" data-f="dirty" hidden>未保存</span><button type="button" data-f="discard">还原</button><button type="button" class="primary" data-f="save">保存</button>';
-    root.appendChild(bar);
-    const q = (f) => root.querySelector('[data-f="' + f + '"]');
-    const markDirty = () => { q("dirty").hidden = false; opts.onDirty(); };
-
-    if (opts.withLabel) {
-      q("label").value = policy.label || "";
-      q("label").addEventListener("input", () => { policy.label = q("label").value; markDirty(); });
-      q("disabled").checked = !!policy.disabled;
-      q("disabled").addEventListener("change", () => { policy.disabled = q("disabled").checked; markDirty(); });
-    }
-    policy.allow_models = policy.allow_models || [];
-    policy.deny_models = policy.deny_models || [];
-    policy.limits = policy.limits || [];
-    const redrawAllow = () => { modelPicker(q("allow"), policy.allow_models, () => { markDirty(); redrawAllow(); }); };
-    const redrawDeny = () => { modelPicker(q("deny"), policy.deny_models, () => { markDirty(); redrawDeny(); }); };
-    redrawAllow(); redrawDeny();
-
-    const tbody = q("limits");
-    const drawLimits = () => {
-      tbody.innerHTML = "";
-      if (!policy.limits.length) { tbody.innerHTML = '<tr><td colspan="6" class="muted">不限</td></tr>'; return; }
-      policy.limits.forEach((l, i) => {
-        const tr = document.createElement("tr");
-        const lv = live[l.id];
-        const used = lv ? lv.used : 0;
-        const pct = l.max > 0 ? Math.min(100, (used / l.max) * 100) : (used > 0 ? 100 : 0);
-        tr.innerHTML =
-          '<td><select data-k="metric">' + Object.entries(METRIC).map(([k, v]) => '<option value="' + k + '">' + v + "</option>").join("") + "</select></td>" +
-          '<td><select data-k="window">' + Object.entries(WINDOW).map(([k, v]) => '<option value="' + k + '">' + v + "</option>").join("") + "</select></td>" +
-          '<td class="n"><input data-k="max" type="number" min="0" step="any" aria-label="上限"></td>' +
-          '<td><input data-k="models" placeholder="全部" list="models" aria-label="适用模型"></td>' +
-          '<td>' + (lv ? '<div class="usage">' + fmt(used, l.metric) + " / " + fmt(l.max, l.metric) + '</div><div class="meter"><i class="' + (pct >= 100 ? "bad" : pct >= 80 ? "warn" : "") + '" data-pct="' + pct + '"></i></div>' + (lv.resets_at ? '<div class="muted small">' + new Date(lv.resets_at).toLocaleString() + " 重置</div>" : "") : '<span class="muted">—</span>') + "</td>" +
-          '<td class="act">' + (lv && opts.onCounter ? '<button type="button" data-a="reset">重置</button> <button type="button" data-a="set">调整</button> ' : "") + '<button type="button" class="danger" data-a="del" aria-label="删除限制">删除</button></td>';
-        const sel = (k) => tr.querySelector('[data-k="' + k + '"]');
-        sel("metric").value = l.metric; sel("window").value = l.window; sel("max").value = l.max; sel("models").value = (l.models || []).join(", ");
-        sel("metric").addEventListener("change", () => { l.metric = sel("metric").value; markDirty(); });
-        sel("window").addEventListener("change", () => { l.window = sel("window").value; markDirty(); });
-        sel("max").addEventListener("input", () => { l.max = Number(sel("max").value) || 0; markDirty(); });
-        sel("models").addEventListener("input", () => { l.models = sel("models").value.split(",").map((s) => s.trim()).filter(Boolean); markDirty(); });
-        tr.querySelector('[data-a="del"]').addEventListener("click", () => { policy.limits.splice(i, 1); markDirty(); drawLimits(); });
-        tr.querySelector('[data-a="reset"]')?.addEventListener("click", () => opts.onCounter(l.id, 0));
-        tr.querySelector('[data-a="set"]')?.addEventListener("click", () => {
-          const v = prompt("将「" + METRIC[l.metric] + " · " + WINDOW[l.window] + "」已用量设为", String(used));
-          if (v === null) return;
-          const n = Number(v);
-          if (!Number.isFinite(n) || n < 0) return toast("请输入非负数字", true);
-          opts.onCounter(l.id, n);
-        });
-        // CSP forbids inline style attributes; CSSOM writes are allowed.
-        tr.querySelector("[data-pct]")?.style.setProperty("width", pct + "%");
-        tbody.appendChild(tr);
-      });
-    };
-    drawLimits();
-    q("addLimit").addEventListener("click", () => {
-      const ids = new Set(policy.limits.map((l) => l.id));
-      let n = policy.limits.length + 1; while (ids.has("l" + n)) n++;
-      policy.limits.push({ id: "l" + n, metric: "requests", window: "day", max: 100, models: [] });
-      markDirty(); drawLimits();
-    });
-    q("discard").addEventListener("click", opts.onDiscard);
-    q("save").addEventListener("click", opts.onSave);
-    return root;
+    if (!keepCurrent || !S.keys.some((k) => k.scope === S.current)) S.current = S.keys[0]?.scope || null;
+    S.draft = null; S.dirty = false;
+    S.defDirty = false; S.priceDirty = false;
+    $("stamp").textContent = "更新于 " + hm(new Date());
+    renderAll();
   }
 
   async function saveConfig(mutate, okMsg) {
@@ -370,106 +441,350 @@ td.n{width:110px}td.act{width:1%;white-space:nowrap}
   }
 
   async function setCounter(scope, limitId, used) {
-    if (used === 0 && !confirm(limitId ? "重置该项已用量？" : "重置此 Key 的全部已用量？")) return;
+    if (used === 0 && !(await ask(limitId ? "将该项已用量清零？" : "将此 Key 的全部已用量清零？", { ok: "重置" }))) return;
     try {
       await api(API + "/usage", { method: "POST", body: { scope, limit_id: limitId || "", used } });
       toast(used === 0 ? "已重置" : "已调整");
+      const keep = { draft: S.draft, dirty: S.dirty };
       await refresh(true);
+      if (keep.dirty) { S.draft = keep.draft; S.dirty = true; renderKey(); }
     } catch (e) { toast(e.message, true); }
+  }
+
+  async function adjust(scope, l) {
+    const v = await ask("「" + METRIC[l.metric] + " · " + WINDOW[l.window] + "」已用量（" + UNIT[l.metric] + "）", { value: String(+(+l.used).toPrecision(10)), ok: "保存" });
+    if (v === null) return;
+    const n = Number(v);
+    if (v.trim() === "" || !Number.isFinite(n) || n < 0) return toast("请输入非负数字", true);
+    setCounter(scope, l.id, n);
+  }
+
+  // ---- render ----
+  function renderAll() { renderSummary(); renderList(); renderKey(); renderDefault(); renderPricing(); }
+
+  function renderSummary() {
+    const live = S.keys.filter((k) => !k.stale);
+    const own = Object.keys(S.config.policies).length;
+    const off = Object.values(S.config.policies).filter((p) => p.disabled).length;
+    const near = live.filter((k) => peak(S.views[k.scope]) >= 0.8).length;
+    $("summary").innerHTML =
+      "<div><span>Key</span><b>" + live.length + "</b></div>" +
+      "<div><span>独立策略</span><b>" + own + "</b></div>" +
+      "<div><span>已停用</span><b>" + off + "</b></div>" +
+      "<div><span>接近或超出上限</span><b" + (near ? ' class="hot"' : "") + ">" + near + "</b></div>";
+    $("nKeys").textContent = live.length;
+    $("nPrices").textContent = S.config.pricing.length || "";
+  }
+
+  function statusPill(k) {
+    const p = S.config.policies[k.scope];
+    if (k.stale) return '<span class="pill off">Key 已删除</span>';
+    if (p?.disabled) return '<span class="pill off">已停用</span>';
+    if (p) return '<span class="pill own">独立策略</span>';
+    if (S.config.default) return '<span class="pill">默认策略</span>';
+    return '<span class="pill">不受限</span>';
+  }
+
+  function renderList() {
+    const q = $("filter").value.trim().toLowerCase();
+    const list = $("keyList");
+    list.innerHTML = "";
+    const rows = S.keys.filter((k) => !q || (nameOf(k) + " " + k.mask).toLowerCase().includes(q));
+    if (!rows.length) { list.innerHTML = '<div class="empty-list">' + (S.keys.length ? "无匹配 Key" : "暂无 Key") + "</div>"; return; }
+    for (const k of rows) {
+      const p = S.config.policies[k.scope];
+      const v = S.views[k.scope];
+      const r = peak(v);
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "key";
+      b.setAttribute("aria-current", String(k.scope === S.current));
+      const sub = [p?.label ? k.mask : "", v?.totals?.requests ? v.totals.requests.toLocaleString() + " 次请求" : ""].filter(Boolean).join(" · ");
+      b.innerHTML =
+        '<span class="name' + (p?.label ? "" : " mono") + '">' + esc(nameOf(k)) + "</span>" +
+        '<span class="use">' + (v?.limits?.length ? '<span class="num">' + Math.round(r * 100) + "%</span>" + gauge(r) : statusPill(k)) + "</span>" +
+        '<span class="sub">' + (sub ? esc(sub) : "&nbsp;") + "</span>";
+      b.addEventListener("click", async () => {
+        if (k.scope === S.current || !(await leaveOk())) return;
+        S.current = k.scope; S.draft = null; S.dirty = false;
+        renderList(); renderKey();
+      });
+      list.appendChild(b);
+    }
+    paint(list);
+  }
+
+  function statsHtml(t) {
+    return '<div class="stats">' +
+      "<div><span>累计请求</span><b>" + (t.requests || 0).toLocaleString() + "</b></div>" +
+      "<div><span>累计 Token</span><b>" + (t.tokens || 0).toLocaleString() + "</b></div>" +
+      "<div><span>累计金额</span><b>$" + (t.cost || 0).toFixed(2) + "</b></div>" +
+      "<div><span>最近使用</span><b>" + (t.last_used ? when(new Date(t.last_used * 1000)) : '<span class="muted">—</span>') + "</b></div>" +
+      "</div>";
+  }
+
+  function headHtml(k, acts) {
+    const p = S.config.policies[k.scope];
+    const title = (S.draft?.label ?? p?.label) || k.mask;
+    const labeled = !!((S.draft?.label ?? p?.label));
+    return '<div class="head"><div class="who"><div class="line"><h2' + (labeled ? "" : ' class="mono"') + ">" + esc(title) + "</h2>" + statusPill(k) + "</div>" +
+      (labeled ? '<span class="mono">' + esc(k.mask) + "</span>" : "") + "</div>" +
+      (acts ? '<div class="acts">' + acts + "</div>" : "") + "</div>";
+  }
+
+  function usageCell(l) {
+    if (!l) return '<span class="muted">—</span>';
+    const r = ratio(l);
+    // Exact figures stay in the tooltip; the cell shows the compact form.
+    return '<div class="usage" title="' + esc(fmt(l.used, l.metric) + " / " + fmt(l.max, l.metric)) + '"><div class="fig"><b>' + short(l.used, l.metric) + '</b><span class="muted">/ ' + short(l.max, l.metric) + "</span></div>" + gauge(r) +
+      (l.resets_at ? '<div class="reset">' + when(new Date(l.resets_at)) + " 重置</div>" : "") + "</div>";
+  }
+
+  function tokenField(container, list, onChange, label) {
+    container.innerHTML = "";
+    const box = document.createElement("div"); box.className = "tokens";
+    const draw = () => {
+      box.querySelectorAll(".chip").forEach((c) => c.remove());
+      list.forEach((m, i) => {
+        const c = document.createElement("span"); c.className = "chip";
+        c.append(m);
+        const x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "移除 " + m);
+        x.addEventListener("click", (e) => { e.stopPropagation(); list.splice(i, 1); onChange(); draw(); });
+        c.appendChild(x);
+        box.insertBefore(c, input);
+      });
+      input.placeholder = list.length ? "" : (label === "allow" ? "全部模型" : "无");
+    };
+    const input = document.createElement("input");
+    input.type = "text"; input.setAttribute("list", "models"); input.setAttribute("aria-label", label === "allow" ? "允许的模型" : "禁止的模型");
+    const add = () => {
+      const v = input.value.trim();
+      input.value = "";
+      if (v && !list.includes(v)) { list.push(v); onChange(); draw(); }
+    };
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); }
+      else if (e.key === "Backspace" && !input.value && list.length) { list.pop(); onChange(); draw(); }
+    });
+    input.addEventListener("change", add);
+    input.addEventListener("blur", add);
+    box.addEventListener("click", () => input.focus());
+    box.appendChild(input);
+    container.appendChild(box);
+    draw();
+  }
+
+  function ensureDatalist() {
+    let dl = $("models");
+    if (!dl) { dl = document.createElement("datalist"); dl.id = "models"; document.body.appendChild(dl); }
+    dl.innerHTML = ["*", ...S.models].map((m) => '<option value="' + esc(m) + '">').join("");
+  }
+
+  // The editor for one policy. `live` maps limit id -> current counter view.
+  function policyEditor(root, policy, live, o) {
+    ensureDatalist();
+    policy.allow_models ||= [];
+    policy.deny_models ||= [];
+    policy.limits ||= [];
+    root.innerHTML = (o.head || "") + (o.stats || "") +
+      (o.base ? '<div class="sec"><div class="base">' +
+        '<label class="field"><span>备注名</span><input type="text" data-f="label" maxlength="80" placeholder="未命名"></label>' +
+        '<label class="switch"><input type="checkbox" data-f="disabled"> 停用此 Key</label></div></div>' : "") +
+      (o.lead || "") +
+      '<div class="sec"><div class="sec-head"><h3>模型</h3></div><div class="cols">' +
+        '<div class="field"><span>允许</span><div data-f="allow"></div></div>' +
+        '<div class="field"><span>禁止</span><div data-f="deny"></div></div></div></div>' +
+      '<div class="sec"><div class="sec-head"><h3>用量限制</h3><span class="grow"></span><button type="button" class="btn sm" data-f="addLimit">添加限制</button></div>' +
+        // The default policy has no single counter to show (each key counts its own), so it drops the 已用 column.
+        '<div class="tbl"><table class="limits"><colgroup><col class="metric"><col class="window"><col class="max"><col>' + (o.counters ? '<col class="used">' : "") + '<col class="act' + (o.counters ? "" : " narrow") + '"></colgroup>' +
+        "<thead><tr><th>指标</th><th>周期</th><th>上限</th><th>适用模型</th>" + (o.counters ? "<th>已用</th>" : "") + '<th></th></tr></thead><tbody data-f="limits"></tbody></table></div></div>' +
+      '<div class="savebar"><span class="dirty" data-f="dirty" hidden>未保存</span><span class="grow"></span>' +
+        '<button type="button" class="btn" data-f="discard">还原</button><button type="button" class="btn primary" data-f="save">保存</button></div>';
+    const q = (f) => root.querySelector('[data-f="' + f + '"]');
+    const sync = () => {
+      const d = o.isDirty();
+      q("dirty").hidden = !d;
+      q("discard").disabled = !d;
+      q("save").disabled = !d;
+    };
+    const touch = () => { o.markDirty(); sync(); };
+
+    if (o.base) {
+      q("label").value = policy.label || "";
+      q("label").addEventListener("input", () => { policy.label = q("label").value; touch(); });
+      q("disabled").checked = !!policy.disabled;
+      q("disabled").addEventListener("change", () => { policy.disabled = q("disabled").checked; touch(); });
+    }
+    tokenField(q("allow"), policy.allow_models, touch, "allow");
+    tokenField(q("deny"), policy.deny_models, touch, "deny");
+
+    const tbody = q("limits");
+    const drawLimits = () => {
+      tbody.innerHTML = "";
+      if (!policy.limits.length) { tbody.innerHTML = '<tr><td colspan="' + (o.counters ? 6 : 5) + '" class="none">不限</td></tr>'; return; }
+      policy.limits.forEach((l, i) => {
+        const tr = document.createElement("tr");
+        const lv = live[l.id];
+        const editable = lv && o.onCounter && lv.metric === l.metric && lv.window === l.window;
+        tr.innerHTML =
+          '<td><select data-k="metric" aria-label="指标">' + Object.entries(METRIC).map(([k, v]) => '<option value="' + k + '">' + v + "</option>").join("") + "</select></td>" +
+          '<td><select data-k="window" aria-label="周期">' + Object.entries(WINDOW).map(([k, v]) => '<option value="' + k + '">' + v + "</option>").join("") + "</select></td>" +
+          '<td><div class="with-unit"><input data-k="max" type="number" min="0" step="any" class="num" aria-label="上限"><em data-k="unit"></em></div></td>' +
+          '<td><input data-k="models" type="text" placeholder="全部" list="models" aria-label="适用模型"></td>' +
+          (o.counters ? "<td>" + usageCell(editable ? lv : null) + "</td>" : "") +
+          '<td class="act">' + (editable ? '<button type="button" class="btn ghost sm" data-a="reset">重置</button><button type="button" class="btn ghost sm" data-a="set">调整</button>' : "") +
+            '<button type="button" class="btn ghost sm danger" data-a="del">删除</button></td>';
+        const sel = (k) => tr.querySelector('[data-k="' + k + '"]');
+        sel("metric").value = l.metric; sel("window").value = l.window; sel("max").value = l.max;
+        sel("unit").textContent = UNIT[l.metric];
+        sel("models").value = (l.models || []).join(", ");
+        sel("metric").addEventListener("change", () => { l.metric = sel("metric").value; sel("unit").textContent = UNIT[l.metric]; touch(); });
+        sel("window").addEventListener("change", () => { l.window = sel("window").value; touch(); });
+        sel("max").addEventListener("input", () => { l.max = Math.max(0, Number(sel("max").value) || 0); touch(); });
+        sel("models").addEventListener("input", () => { l.models = sel("models").value.split(",").map((s) => s.trim()).filter(Boolean); touch(); });
+        tr.querySelector('[data-a="del"]').addEventListener("click", () => { policy.limits.splice(i, 1); touch(); drawLimits(); });
+        tr.querySelector('[data-a="reset"]')?.addEventListener("click", () => o.onCounter(l.id, 0));
+        tr.querySelector('[data-a="set"]')?.addEventListener("click", () => adjust(o.scope, lv));
+        tbody.appendChild(tr);
+      });
+      paint(tbody);
+    };
+    drawLimits();
+    q("addLimit").addEventListener("click", () => {
+      const ids = new Set(policy.limits.map((l) => l.id));
+      let n = policy.limits.length + 1; while (ids.has("l" + n)) n++;
+      policy.limits.push({ id: "l" + n, metric: "requests", window: "day", max: 100, models: [] });
+      touch(); drawLimits();
+      tbody.lastElementChild?.querySelector('[data-k="max"]')?.focus();
+    });
+    q("discard").addEventListener("click", o.onDiscard);
+    q("save").addEventListener("click", o.onSave);
+    sync();
   }
 
   function renderKey() {
     const root = $("keyPanel");
     const k = S.keys.find((x) => x.scope === S.current);
-    if (!k) { root.innerHTML = '<div class="detail muted">暂无 Key</div>'; return; }
+    if (!k) { root.innerHTML = '<div class="cta muted">暂无 Key</div>'; return; }
     const own = S.config.policies[k.scope];
     const view = S.views[k.scope] || { limits: [], totals: {} };
     const live = Object.fromEntries((view.limits || []).map((l) => [l.id, l]));
-    const t = view.totals || {};
-    const stats = '<div class="stats"><span>累计请求 <b>' + (t.requests || 0).toLocaleString() + '</b></span><span>累计 Token <b>' + (t.tokens || 0).toLocaleString() + '</b></span><span>累计金额 <b>$' + (t.cost || 0).toFixed(2) + "</b></span>" + (t.last_used ? "<span>最近使用 <b>" + new Date(t.last_used * 1000).toLocaleString() + "</b></span>" : "") + "</div>";
+    const stats = statsHtml(view.totals || {});
 
-    if (!own) {
-      root.innerHTML = '<div class="detail"><div class="row"><h2 class="grow">' + esc(k.mask) + "</h2></div>" + stats +
-        '<p class="muted">' + (S.config.default ? "使用默认策略" : "不受限制") + "</p>" +
-        (view.limits?.length ? '<table><thead><tr><th>指标</th><th>周期</th><th>已用</th><th></th></tr></thead><tbody>' + view.limits.map((l) => "<tr><td>" + METRIC[l.metric] + "</td><td>" + WINDOW[l.window] + '</td><td class="usage">' + fmt(l.used, l.metric) + " / " + fmt(l.max, l.metric) + '</td><td class="act"><button type="button" data-reset="' + esc(l.id) + '">重置</button></td></tr>').join("") + "</tbody></table>" : "") +
-        '<div class="row mt16"><button type="button" class="primary" id="mkOwn">设置独立策略</button></div></div>';
+    if (!own && !S.draft) {
+      const rows = (view.limits || []).map((l) =>
+        "<tr><td>" + METRIC[l.metric] + "</td><td>" + WINDOW[l.window] + "</td><td>" + usageCell(l) + '</td><td class="act">' +
+        '<button type="button" class="btn ghost sm" data-reset="' + esc(l.id) + '">重置</button><button type="button" class="btn ghost sm" data-set="' + esc(l.id) + '">调整</button></td></tr>').join("");
+      root.innerHTML = headHtml(k) + stats +
+        (rows ? '<div class="sec"><div class="sec-head"><h3>用量限制</h3></div><div class="tbl"><table class="limits ro"><colgroup><col class="metric"><col class="window"><col class="used"><col class="act"></colgroup><thead><tr><th>指标</th><th>周期</th><th>已用</th><th></th></tr></thead><tbody>' + rows + "</tbody></table></div></div>" : "") +
+        '<div class="cta"><button type="button" class="btn primary" id="mkOwn">设置独立策略</button></div>';
+      paint(root);
       root.querySelectorAll("[data-reset]").forEach((b) => b.addEventListener("click", () => setCounter(k.scope, b.dataset.reset, 0)));
+      root.querySelectorAll("[data-set]").forEach((b) => b.addEventListener("click", () => adjust(k.scope, live[b.dataset.set])));
       $("mkOwn").addEventListener("click", () => {
         S.draft = clone(S.config.default || {});
         delete S.draft.label; S.draft.disabled = false;
-        drawOwn(root, k, live, stats, true);
+        S.dirty = true;
+        renderKey(); renderList();
       });
       return;
     }
+    const isNew = !own;
     if (!S.draft) S.draft = clone(own);
-    drawOwn(root, k, live, stats, false);
-  }
-
-  function drawOwn(root, k, live, stats, isNew) {
+    const acts = isNew ? "" :
+      '<button type="button" class="btn ghost sm" data-x="resetAll">重置全部已用量</button>' +
+      '<button type="button" class="btn ghost sm danger" data-x="drop">移除独立策略</button>';
     policyEditor(root, S.draft, live, {
-      title: S.draft.label || k.mask,
-      headerExtra: k.stale ? '<span class="tag off">Key 已删除</span>' : "",
-      stats,
-      withLabel: true,
-      barExtra: (isNew ? "" : '<button type="button" class="danger" data-x="drop">移除独立策略</button><button type="button" data-x="resetAll">重置全部已用量</button><span class="grow"></span>'),
-      onDirty: () => {},
-      onDiscard: () => { S.draft = null; renderKey(); },
+      head: headHtml(k, acts), stats, base: true, counters: true, scope: k.scope,
+      isDirty: () => S.dirty, markDirty: () => { S.dirty = true; },
+      onDiscard: () => { S.draft = null; S.dirty = false; renderKey(); },
       onCounter: isNew ? null : (id, v) => setCounter(k.scope, id, v),
-      onSave: () => { const d = clone(S.draft); saveConfig((c) => { c.policies[k.scope] = d; }); },
+      onSave: () => { const d = clone(S.draft); d.label = (d.label || "").trim(); saveConfig((c) => { c.policies[k.scope] = d; }); },
     });
-    root.querySelector('[data-x="drop"]')?.addEventListener("click", () => {
-      if (!confirm("移除后此 Key " + (S.config.default ? "改用默认策略" : "不再受限") + "，确定？")) return;
+    root.querySelector('[data-x="drop"]')?.addEventListener("click", async () => {
+      if (!(await ask("移除后此 Key " + (S.config.default ? "改用默认策略" : "不再受限") + "。", { ok: "移除", danger: true }))) return;
       saveConfig((c) => { delete c.policies[k.scope]; }, "已移除");
     });
     root.querySelector('[data-x="resetAll"]')?.addEventListener("click", () => setCounter(k.scope, "", 0));
+    // Keep the header title in step with the label field.
+    root.querySelector('[data-f="label"]')?.addEventListener("input", (e) => {
+      const h = root.querySelector(".head h2");
+      const v = e.target.value.trim();
+      h.textContent = v || k.mask;
+      h.classList.toggle("mono", !v);
+    });
   }
 
-  let defaultDraft = null;
   function renderDefault() {
     const root = $("tab-default");
-    defaultDraft = clone(S.config.default || {});
-    const enabled = !!S.config.default;
-    policyEditor(root, defaultDraft, {}, {
-      title: "默认策略",
-      stats: '<p class="muted">对没有独立策略的 Key 生效，每个 Key 单独计量。</p><label class="row my8"><input type="checkbox" id="defOn"' + (enabled ? " checked" : "") + "> 启用</label>",
-      withLabel: false,
-      onDirty: () => {},
-      onDiscard: () => renderDefault(),
-      onSave: () => {
-        const on = $("defOn").checked, d = clone(defaultDraft);
-        saveConfig((c) => { if (on) c.default = d; else delete c.default; });
-      },
+    if (!S.defDirty) { S.defDraft = clone(S.config.default || {}); S.defOn = !!S.config.default; }
+    policyEditor(root, S.defDraft, {}, {
+      head: '<div class="head"><div class="who"><div class="line"><h2>默认策略</h2><span class="muted">没有独立策略的 Key 使用此策略，各自计量</span></div></div><div class="acts"><label class="switch"><input type="checkbox" id="defOn"> 启用</label></div></div>',
+      isDirty: () => S.defDirty, markDirty: () => { S.defDirty = true; },
+      onDiscard: () => { S.defDirty = false; renderDefault(); },
+      onSave: () => { const on = S.defOn, d = clone(S.defDraft); saveConfig((c) => { if (on) c.default = d; else delete c.default; }); },
+    });
+    const sw = $("defOn");
+    sw.checked = S.defOn;
+    sw.addEventListener("change", () => {
+      S.defOn = sw.checked; S.defDirty = true;
+      const q = (f) => root.querySelector('[data-f="' + f + '"]');
+      q("dirty").hidden = false; q("discard").disabled = false; q("save").disabled = false;
     });
   }
 
   function renderPricing() {
-    const tb = $("priceRows");
-    tb.innerHTML = "";
-    S.config.pricing.forEach((r, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = '<td><input data-k="pattern" list="models" placeholder="模型名或通配符"></td>' +
-        ["input", "output", "cache_read", "cache_write"].map((k) => '<td class="n"><input data-k="' + k + '" type="number" min="0" step="any"></td>').join("") +
-        '<td class="act"><button type="button" class="danger" aria-label="删除价格">删除</button></td>';
-      tr.querySelectorAll("input").forEach((inp) => {
-        const k = inp.dataset.k;
-        inp.value = r[k] ?? "";
-        inp.addEventListener("input", () => { r[k] = k === "pattern" ? inp.value : Number(inp.value) || 0; });
+    const root = $("tab-pricing");
+    if (!S.priceDirty) S.prices = clone(S.config.pricing);
+    ensureDatalist();
+    root.innerHTML =
+      '<div class="head"><div class="who"><div class="line"><h2>模型价格</h2><span class="unit muted">USD / 百万 Token</span></div></div><div class="acts"><button type="button" class="btn sm" id="addPrice">添加</button></div></div>' +
+      '<div class="sec">' +
+      '<div class="tbl"><table class="prices"><colgroup><col><col class="p"><col class="p"><col class="p"><col class="p"><col class="act"></colgroup><thead><tr><th>模型</th><th>输入</th><th>输出</th><th>缓存读取</th><th>缓存写入</th><th></th></tr></thead><tbody id="priceRows"></tbody></table></div></div>' +
+      '<div class="savebar"><span class="dirty" id="priceDirty" hidden>未保存</span><span class="grow"></span>' +
+      '<button type="button" class="btn" id="priceDiscard">还原</button><button type="button" class="btn primary" id="priceSave">保存</button></div>';
+    const sync = () => { $("priceDirty").hidden = !S.priceDirty; $("priceDiscard").disabled = !S.priceDirty; $("priceSave").disabled = !S.priceDirty; };
+    const touch = () => { S.priceDirty = true; sync(); };
+    const draw = () => {
+      const tb = $("priceRows");
+      tb.innerHTML = "";
+      if (!S.prices.length) { tb.innerHTML = '<tr><td colspan="6" class="none">未设置</td></tr>'; return; }
+      S.prices.forEach((r, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = '<td><input data-k="pattern" type="text" list="models" placeholder="模型名或通配符" aria-label="模型"></td>' +
+          ["input", "output", "cache_read", "cache_write"].map((k) => '<td><input data-k="' + k + '" type="number" min="0" step="any" class="num" aria-label="' + k + '"></td>').join("") +
+          '<td class="act"><button type="button" class="btn ghost sm danger">删除</button></td>';
+        tr.querySelectorAll("input").forEach((inp) => {
+          const k = inp.dataset.k;
+          inp.value = r[k] ?? "";
+          inp.addEventListener("input", () => { r[k] = k === "pattern" ? inp.value : Math.max(0, Number(inp.value) || 0); touch(); });
+        });
+        tr.querySelector("button").addEventListener("click", () => { S.prices.splice(i, 1); touch(); draw(); });
+        tb.appendChild(tr);
       });
-      tr.querySelector("button").addEventListener("click", () => { S.config.pricing.splice(i, 1); renderPricing(); });
-      tb.appendChild(tr);
+    };
+    draw();
+    $("addPrice").addEventListener("click", () => {
+      S.prices.push({ pattern: "", input: 0, output: 0, cache_read: 0, cache_write: 0 });
+      touch(); draw();
+      $("priceRows").lastElementChild?.querySelector("input")?.focus();
     });
-    if (!S.config.pricing.length) tb.innerHTML = '<tr><td colspan="6" class="muted">未设置</td></tr>';
+    $("priceDiscard").addEventListener("click", () => { S.priceDirty = false; renderPricing(); });
+    $("priceSave").addEventListener("click", () => {
+      const p = clone(S.prices).filter((r) => r.pattern.trim()).map((r) => ({ ...r, pattern: r.pattern.trim() }));
+      saveConfig((c) => { c.pricing = p; });
+    });
+    sync();
   }
 
-  $("addPrice").addEventListener("click", () => { S.config.pricing.push({ pattern: "", input: 0, output: 0, cache_read: 0, cache_write: 0 }); ensureDatalist(); renderPricing(); });
-  $("savePricing").addEventListener("click", () => { const p = clone(S.config.pricing); saveConfig((c) => { c.pricing = p; }); });
+  // ---- wiring ----
   $("filter").addEventListener("input", renderList);
-  $("reload").addEventListener("click", () => { if (S.draft && !confirm("放弃未保存的修改？")) return; refresh(true).catch((e) => toast(e.message, true)); });
+  $("reload").addEventListener("click", async () => { if (await leaveOk()) refresh(true).catch((e) => toast(e.message, true)); });
   document.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => {
     S.tab = b.dataset.tab;
     document.querySelectorAll("[data-tab]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
     for (const t of ["keys", "default", "pricing"]) $("tab-" + t).hidden = t !== S.tab;
   }));
+  addEventListener("beforeunload", (e) => { if (anyDirty()) e.preventDefault(); });
 
   async function start(token) {
     S.token = token;
