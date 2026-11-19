@@ -1,0 +1,7 @@
+*.so
+*.h
+/dist/
+/key-quota
+/cpa-key-quota
+*.test
+*.out

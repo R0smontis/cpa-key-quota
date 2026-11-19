@@ -1,0 +1,71 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    # Debian 12 matches the CLIProxyAPI image, so the plugin needs no newer glibc than the host has.
+    container: golang:1.25-bookworm
+    steps:
+      - uses: actions/checkout@v4
+      - name: test
+        env:
+          CGO_ENABLED: "1"
+        run: go test -count=1 ./...
+      - name: build
+        env:
+          CGO_ENABLED: "1"
+          GOAMD64: v1
+        # CPA loads plugins as plugins/linux/<arch>/key-quota-v<version>.so; the
+        # release asset carries the arch in its name so both builds can coexist.
+        run: |
+          set -eu
+          v="${GITHUB_REF_NAME#v}"
+          so="key-quota-v${v}.so"
+          asset="key-quota-v${v}_linux_${{ matrix.arch }}.so"
+          mkdir -p dist
+          go build -trimpath -buildmode=c-shared \
+            -ldflags "-s -w -X main.pluginVersion=${v}" \
+            -o "dist/${so}" .
+          echo "max required: $(objdump -T "dist/${so}" | grep -oE 'GLIBC_[0-9.]+' | sort -Vu | tail -1)"
+          objdump -T "dist/${so}" | grep -q ' cliproxy_plugin_init$'
+          cd dist
+          mv "${so}" "${asset}"
+          rm -f ./*.h
+          sha256sum "${asset}" > "${asset}.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: |
+            dist/*.so
+            dist/*.sha256
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes

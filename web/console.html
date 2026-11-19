@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Key 配额</title>
+<style nonce="{{NONCE}}">
+:root{--bg:#f6f7f8;--panel:#fff;--panel2:#eef0f2;--ink:#16181b;--dim:#5f656d;--line:#dde1e5;--accent:#1f6feb;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--bar:#e4e7eb}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--panel:#171a20;--panel2:#1f232b;--ink:#e8eaed;--dim:#9aa1ab;--line:#2b313a;--accent:#4c8dff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--bar:#2b313a}}
+:root.dark{--bg:#0f1115;--panel:#171a20;--panel2:#1f232b;--ink:#e8eaed;--dim:#9aa1ab;--line:#2b313a;--accent:#4c8dff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--bar:#2b313a}
+:root.light{--bg:#f6f7f8;--panel:#fff;--panel2:#eef0f2;--ink:#16181b;--dim:#5f656d;--line:#dde1e5;--accent:#1f6feb;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--bar:#e4e7eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:22px;margin:0}h2{font-size:16px;margin:0}
+header{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+header .sp{flex:1}
+button,input,select{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--panel);padding:6px 12px;border-radius:6px;cursor:pointer}
+button:hover{background:var(--panel2)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{color:var(--bad)}
+button:disabled{opacity:.5;cursor:default}
+input,select{border:1px solid var(--line);background:var(--panel);padding:6px 8px;border-radius:6px;min-width:0}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.tabs{display:flex;gap:4px;margin-bottom:16px}
+.tabs button{border-radius:6px}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.list{max-height:calc(100vh - 170px);overflow:auto}
+.list input{margin:10px;width:calc(100% - 20px)}
+.key{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);border-radius:0;padding:10px 14px;background:none}
+.key[aria-current=true]{background:var(--panel2)}
+.key b{display:block;font-weight:600}
+.key small{color:var(--dim)}
+.tag{display:inline-block;font-size:12px;padding:0 6px;border-radius:4px;background:var(--panel2);color:var(--dim);margin-left:6px}
+.tag.own{color:var(--accent)}.tag.off{color:var(--bad)}
+.detail{padding:18px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field{display:grid;gap:4px;margin:14px 0}
+.field>span{color:var(--dim);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--panel2);border-radius:5px;padding:2px 4px 2px 8px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.chip button{border:0;background:none;padding:0 4px;line-height:1}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:8px 6px;border-top:1px solid var(--line);vertical-align:middle}
+th{color:var(--dim);font-weight:500;font-size:13px;border-top:0}
+td input,td select{width:100%}
+td.n{width:110px}td.act{width:1%;white-space:nowrap}
+.grow{flex:1}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.my8{margin:8px 0}.small{font-size:12px}.chips input{min-width:220px}
+.meter{height:6px;background:var(--bar);border-radius:3px;overflow:hidden;min-width:80px}
+.meter i{display:block;height:100%;background:var(--ok)}
+.meter i.warn{background:var(--warn)}.meter i.bad{background:var(--bad)}
+.usage{font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
+.muted{color:var(--dim)}
+.bar{position:sticky;bottom:0;display:flex;gap:10px;justify-content:flex-end;align-items:center;padding:12px 18px;border-top:1px solid var(--line);background:var(--panel);border-radius:0 0 10px 10px}
+.toast{position:fixed;right:20px;bottom:20px;padding:10px 14px;border-radius:8px;background:var(--ink);color:var(--bg);max-width:420px}
+.toast.bad{background:var(--bad);color:#fff}
+.login{max-width:420px;margin:12vh auto;padding:24px}
+.login .row{margin-top:12px}.login input{flex:1}
+.err{color:var(--bad)}
+.stats{display:flex;gap:24px;margin:6px 0 4px;color:var(--dim);font-size:13px}
+.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+@media (max-width:820px){.layout{grid-template-columns:1fr}.list{max-height:none}}
+</style>
+</head>
+<body>
+<main>
+  <section id="login" class="panel login" hidden>
+    <h1>Key 配额</h1>
+    <div class="row">
+      <input id="mgmt" type="password" autocomplete="off" placeholder="管理密钥" aria-label="管理密钥">
+      <button id="connect" class="primary" type="button">连接</button>
+    </div>
+    <p id="loginErr" class="err" hidden></p>
+  </section>
+
+  <section id="app" hidden>
+    <header>
+      <h1>Key 配额</h1>
+      <span class="sp"></span>
+      <button id="reload" type="button">刷新</button>
+    </header>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="keys" aria-selected="true" type="button">Key</button>
+      <button role="tab" data-tab="default" aria-selected="false" type="button">默认策略</button>
+      <button role="tab" data-tab="pricing" aria-selected="false" type="button">模型价格</button>
+    </div>
+
+    <div id="tab-keys" class="layout">
+      <div class="panel list">
+        <input id="filter" type="search" placeholder="筛选" aria-label="筛选 Key">
+        <div id="keyList"></div>
+      </div>
+      <div class="panel" id="keyPanel"></div>
+    </div>
+
+    <div id="tab-default" class="panel" hidden></div>
+
+    <div id="tab-pricing" class="panel" hidden>
+      <div class="detail">
+        <h2>模型价格</h2>
+        <p class="muted">USD / 百万 Token</p>
+        <table>
+          <thead><tr><th>模型</th><th>输入</th><th>输出</th><th>缓存读取</th><th>缓存写入</th><th></th></tr></thead>
+          <tbody id="priceRows"></tbody>
+        </table>
+        <div class="row mt12"><button id="addPrice" type="button">添加</button></div>
+      </div>
+      <div class="bar"><button id="savePricing" class="primary" type="button">保存</button></div>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script nonce="{{NONCE}}">
+"use strict";
+(() => {
+  const API = "/v0/management/plugins/key-quota";
+  const $ = (id) => document.getElementById(id);
+  const S = { token: "", keys: [], config: null, revision: 0, views: {}, models: [], current: null, draft: null, tab: "keys" };
+  const METRIC = { requests: "请求次数", tokens: "Token", cost: "金额 (USD)" };
+  const WINDOW = { total: "累计", hour: "每小时", day: "每天", week: "每周", month: "每月" };
+
+  // Theme follows CPAMC when embedded.
+  try {
+    const th = localStorage.getItem("cli-proxy-theme");
+    const v = th && (JSON.parse(th)?.state?.theme ?? th);
+    if (v === "dark" || v === "light") document.documentElement.classList.add(v);
+  } catch (_) {}
+
+  // CPAMC stores the management key as reversible XOR obfuscation (enc::v2 drops
+  // the UA from the key; enc::v1 is the legacy form).
+  function decodeStored(raw) {
+    if (!raw) return null;
+    const v2 = raw.startsWith("enc::v2::"), v1 = raw.startsWith("enc::v1::");
+    if (!v1 && !v2) return raw;
+    const bytes = Uint8Array.from(atob(raw.slice(9)), (c) => c.charCodeAt(0));
+    const salt = "cli-proxy-api-webui::secure-storage|" + location.host + (v1 ? "|" + navigator.userAgent : "");
+    const key = new TextEncoder().encode(salt);
+    return new TextDecoder().decode(bytes.map((b, i) => b ^ key[i % key.length]));
+  }
+  function sessionKey() {
+    try {
+      const s = JSON.parse(decodeStored(localStorage.getItem("cli-proxy-auth")));
+      const k = (s?.state ?? s)?.managementKey;
+      return typeof k === "string" ? k.trim() : "";
+    } catch (_) { return ""; }
+  }
+
+  async function api(path, opt = {}) {
+    const r = await fetch(path, {
+      method: opt.method || "GET",
+      cache: "no-store",
+      headers: { Accept: "application/json", Authorization: "Bearer " + S.token, ...(opt.body ? { "Content-Type": "application/json" } : {}), ...(opt.headers || {}) },
+      body: opt.body ? JSON.stringify(opt.body) : undefined,
+    });
+    let data = null;
+    try { data = await r.json(); } catch (_) {}
+    if (!r.ok) {
+      const e = new Error((data && (data.error?.message || data.error)) || "请求失败 (" + r.status + ")");
+      e.status = r.status;
+      throw e;
+    }
+    return data;
+  }
+
+  async function sha256(text) {
+    const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  function mask(k) {
+    if (k.length < 8) return "••••••";
+    if (k.length < 16) return k.slice(0, 2) + "••••" + k.slice(-2);
+    const p = (/^[A-Za-z]{2,4}-/.exec(k) || [""])[0];
+    return k.slice(0, p.length + 4) + "••••" + k.slice(-4);
+  }
+
+  async function loadKeys() {
+    const res = await api("/v0/management/api-keys");
+    const raw = (res && res["api-keys"]) || [];
+    const vals = raw.map((v) => String(v).trim()).filter(Boolean);
+    const out = [], seen = new Set();
+    for (const v of vals) {
+      const scope = await sha256("cli-proxy-api:caller-scope:v1\0" + v);
+      if (seen.has(scope)) continue;
+      seen.add(scope);
+      out.push({ scope, mask: mask(v) });
+    }
+    // Model catalog via the first key; raw keys are dropped right after.
+    if (vals.length) {
+      try {
+        const r = await fetch("/v1/models", { headers: { Authorization: "Bearer " + vals[0] }, cache: "no-store" });
+        const j = await r.json();
+        S.models = [...new Set((j.data || []).map((m) => m.id).filter(Boolean))].sort();
+      } catch (_) { S.models = []; }
+    }
+    vals.fill(""); raw.fill("");
+    return out;
+  }
+
+  async function refresh(keepCurrent) {
+    S.keys = await loadKeys();
+    const st = await api(API + "/state", { method: "POST", body: { scopes: S.keys.map((k) => k.scope) } });
+    S.config = st.config; S.revision = st.revision; S.views = st.keys || {};
+    if (!S.config.policies) S.config.policies = {};
+    if (!S.config.pricing) S.config.pricing = [];
+    // Policies whose key no longer exists stay listed so they are never lost silently.
+    for (const scope of Object.keys(S.config.policies)) {
+      if (!S.keys.some((k) => k.scope === scope)) S.keys.push({ scope, mask: "已删除的 Key", stale: true });
+    }
+    if (!keepCurrent || !S.keys.some((k) => k.scope === S.current)) S.current = S.keys[0]?.scope || null;
+    S.draft = null;
+    renderList(); renderKey(); renderDefault(); renderPricing();
+  }
+
+  function toast(msg, bad) {
+    const t = $("toast");
+    t.textContent = msg; t.className = "toast" + (bad ? " bad" : ""); t.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), bad ? 5000 : 2200);
+  }
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmt = (n, metric) => metric === "cost" ? "$" + (+n).toFixed(n < 1 ? 4 : 2) : Math.round(n).toLocaleString();
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+
+  function renderList() {
+    const q = $("filter").value.trim().toLowerCase();
+    const list = $("keyList");
+    list.innerHTML = "";
+    for (const k of S.keys) {
+      const p = S.config.policies[k.scope];
+      const label = p?.label || k.mask;
+      if (q && !(label + " " + k.mask).toLowerCase().includes(q)) continue;
+      const v = S.views[k.scope];
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "key";
+      b.setAttribute("aria-current", String(k.scope === S.current));
+      const tag = p ? (p.disabled ? '<span class="tag off">停用</span>' : '<span class="tag own">独立策略</span>') : (S.config.default ? '<span class="tag">默认策略</span>' : "");
+      b.innerHTML = "<b>" + esc(label) + tag + "</b><small>" + esc(p?.label ? k.mask : "") + (v?.totals?.requests ? (p?.label ? " · " : "") + v.totals.requests.toLocaleString() + " 次请求" : "") + "</small>";
+      b.addEventListener("click", () => {
+        if (S.draft && !confirm("放弃未保存的修改？")) return;
+        S.current = k.scope; S.draft = null; renderList(); renderKey();
+      });
+      list.appendChild(b);
+    }
+  }
+
+  function modelPicker(container, list, onChange) {
+    container.innerHTML = "";
+    const chips = document.createElement("div"); chips.className = "chips";
+    list.forEach((m, i) => {
+      const c = document.createElement("span"); c.className = "chip"; c.textContent = m;
+      const x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "移除 " + m);
+      x.addEventListener("click", () => { list.splice(i, 1); onChange(); });
+      c.appendChild(x); chips.appendChild(c);
+    });
+    const input = document.createElement("input");
+    input.placeholder = "模型名或通配符，如 gpt-6*"; input.setAttribute("list", "models");
+    const add = () => { const v = input.value.trim(); if (v && !list.includes(v)) { list.push(v); onChange(); } else input.value = ""; };
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } });
+    input.addEventListener("change", add);
+    chips.appendChild(input);
+    container.appendChild(chips);
+  }
+
+  function ensureDatalist() {
+    let dl = $("models");
+    if (!dl) { dl = document.createElement("datalist"); dl.id = "models"; document.body.appendChild(dl); }
+    dl.innerHTML = ["*", ...S.models].map((m) => '<option value="' + esc(m) + '">').join("");
+  }
+
+  // Renders the editor for one policy. `live` maps limit id -> {used, resets_at}.
+  function policyEditor(root, policy, live, opts) {
+    ensureDatalist();
+    root.innerHTML = "";
+    const wrap = document.createElement("div"); wrap.className = "detail";
+    wrap.innerHTML =
+      '<div class="row"><h2 class="grow">' + esc(opts.title) + "</h2>" + (opts.headerExtra || "") + "</div>" +
+      (opts.stats || "") +
+      (opts.withLabel ? '<label class="field"><span>备注名</span><input data-f="label" maxlength="80"></label>' : "") +
+      (opts.withLabel ? '<label class="row my8"><input type="checkbox" data-f="disabled"> 停用此 Key</label>' : "") +
+      '<div class="field"><span>允许的模型（留空表示全部）</span><div data-f="allow"></div></div>' +
+      '<div class="field"><span>禁止的模型</span><div data-f="deny"></div></div>' +
+      '<div class="field"><span>用量限制</span><table><thead><tr><th>指标</th><th>周期</th><th>上限</th><th>适用模型</th><th>已用</th><th></th></tr></thead><tbody data-f="limits"></tbody></table>' +
+      '<div class="row mt8"><button type="button" data-f="addLimit">添加限制</button></div></div>';
+    root.appendChild(wrap);
+    const bar = document.createElement("div"); bar.className = "bar";
+    bar.innerHTML = (opts.barExtra || "") + '<span class="muted" data-f="dirty" hidden>未保存</span><button type="button" data-f="discard">还原</button><button type="button" class="primary" data-f="save">保存</button>';
+    root.appendChild(bar);
+    const q = (f) => root.querySelector('[data-f="' + f + '"]');
+    const markDirty = () => { q("dirty").hidden = false; opts.onDirty(); };
+
+    if (opts.withLabel) {
+      q("label").value = policy.label || "";
+      q("label").addEventListener("input", () => { policy.label = q("label").value; markDirty(); });
+      q("disabled").checked = !!policy.disabled;
+      q("disabled").addEventListener("change", () => { policy.disabled = q("disabled").checked; markDirty(); });
+    }
+    policy.allow_models = policy.allow_models || [];
+    policy.deny_models = policy.deny_models || [];
+    policy.limits = policy.limits || [];
+    const redrawAllow = () => { modelPicker(q("allow"), policy.allow_models, () => { markDirty(); redrawAllow(); }); };
+    const redrawDeny = () => { modelPicker(q("deny"), policy.deny_models, () => { markDirty(); redrawDeny(); }); };
+    redrawAllow(); redrawDeny();
+
+    const tbody = q("limits");
+    const drawLimits = () => {
+      tbody.innerHTML = "";
+      if (!policy.limits.length) { tbody.innerHTML = '<tr><td colspan="6" class="muted">不限</td></tr>'; return; }
+      policy.limits.forEach((l, i) => {
+        const tr = document.createElement("tr");
+        const lv = live[l.id];
+        const used = lv ? lv.used : 0;
+        const pct = l.max > 0 ? Math.min(100, (used / l.max) * 100) : (used > 0 ? 100 : 0);
+        tr.innerHTML =
+          '<td><select data-k="metric">' + Object.entries(METRIC).map(([k, v]) => '<option value="' + k + '">' + v + "</option>").join("") + "</select></td>" +
+          '<td><select data-k="window">' + Object.entries(WINDOW).map(([k, v]) => '<option value="' + k + '">' + v + "</option>").join("") + "</select></td>" +
+          '<td class="n"><input data-k="max" type="number" min="0" step="any" aria-label="上限"></td>' +
+          '<td><input data-k="models" placeholder="全部" list="models" aria-label="适用模型"></td>' +
+          '<td>' + (lv ? '<div class="usage">' + fmt(used, l.metric) + " / " + fmt(l.max, l.metric) + '</div><div class="meter"><i class="' + (pct >= 100 ? "bad" : pct >= 80 ? "warn" : "") + '" data-pct="' + pct + '"></i></div>' + (lv.resets_at ? '<div class="muted small">' + new Date(lv.resets_at).toLocaleString() + " 重置</div>" : "") : '<span class="muted">—</span>') + "</td>" +
+          '<td class="act">' + (lv && opts.onCounter ? '<button type="button" data-a="reset">重置</button> <button type="button" data-a="set">调整</button> ' : "") + '<button type="button" class="danger" data-a="del" aria-label="删除限制">删除</button></td>';
+        const sel = (k) => tr.querySelector('[data-k="' + k + '"]');
+        sel("metric").value = l.metric; sel("window").value = l.window; sel("max").value = l.max; sel("models").value = (l.models || []).join(", ");
+        sel("metric").addEventListener("change", () => { l.metric = sel("metric").value; markDirty(); });
+        sel("window").addEventListener("change", () => { l.window = sel("window").value; markDirty(); });
+        sel("max").addEventListener("input", () => { l.max = Number(sel("max").value) || 0; markDirty(); });
+        sel("models").addEventListener("input", () => { l.models = sel("models").value.split(",").map((s) => s.trim()).filter(Boolean); markDirty(); });
+        tr.querySelector('[data-a="del"]').addEventListener("click", () => { policy.limits.splice(i, 1); markDirty(); drawLimits(); });
+        tr.querySelector('[data-a="reset"]')?.addEventListener("click", () => opts.onCounter(l.id, 0));
+        tr.querySelector('[data-a="set"]')?.addEventListener("click", () => {
+          const v = prompt("将「" + METRIC[l.metric] + " · " + WINDOW[l.window] + "」已用量设为", String(used));
+          if (v === null) return;
+          const n = Number(v);
+          if (!Number.isFinite(n) || n < 0) return toast("请输入非负数字", true);
+          opts.onCounter(l.id, n);
+        });
+        // CSP forbids inline style attributes; CSSOM writes are allowed.
+        tr.querySelector("[data-pct]")?.style.setProperty("width", pct + "%");
+        tbody.appendChild(tr);
+      });
+    };
+    drawLimits();
+    q("addLimit").addEventListener("click", () => {
+      const ids = new Set(policy.limits.map((l) => l.id));
+      let n = policy.limits.length + 1; while (ids.has("l" + n)) n++;
+      policy.limits.push({ id: "l" + n, metric: "requests", window: "day", max: 100, models: [] });
+      markDirty(); drawLimits();
+    });
+    q("discard").addEventListener("click", opts.onDiscard);
+    q("save").addEventListener("click", opts.onSave);
+    return root;
+  }
+
+  async function saveConfig(mutate, okMsg) {
+    const next = clone(S.config);
+    mutate(next);
+    try {
+      const r = await api(API + "/policy", { method: "PUT", body: next, headers: { "If-Match": '"rev-' + S.revision + '"' } });
+      S.revision = r.revision;
+      toast(okMsg || "已保存");
+      await refresh(true);
+    } catch (e) {
+      toast(e.message, true);
+      if (e.status === 412) await refresh(true);
+    }
+  }
+
+  async function setCounter(scope, limitId, used) {
+    if (used === 0 && !confirm(limitId ? "重置该项已用量？" : "重置此 Key 的全部已用量？")) return;
+    try {
+      await api(API + "/usage", { method: "POST", body: { scope, limit_id: limitId || "", used } });
+      toast(used === 0 ? "已重置" : "已调整");
+      await refresh(true);
+    } catch (e) { toast(e.message, true); }
+  }
+
+  function renderKey() {
+    const root = $("keyPanel");
+    const k = S.keys.find((x) => x.scope === S.current);
+    if (!k) { root.innerHTML = '<div class="detail muted">暂无 Key</div>'; return; }
+    const own = S.config.policies[k.scope];
+    const view = S.views[k.scope] || { limits: [], totals: {} };
+    const live = Object.fromEntries((view.limits || []).map((l) => [l.id, l]));
+    const t = view.totals || {};
+    const stats = '<div class="stats"><span>累计请求 <b>' + (t.requests || 0).toLocaleString() + '</b></span><span>累计 Token <b>' + (t.tokens || 0).toLocaleString() + '</b></span><span>累计金额 <b>$' + (t.cost || 0).toFixed(2) + "</b></span>" + (t.last_used ? "<span>最近使用 <b>" + new Date(t.last_used * 1000).toLocaleString() + "</b></span>" : "") + "</div>";
+
+    if (!own) {
+      root.innerHTML = '<div class="detail"><div class="row"><h2 class="grow">' + esc(k.mask) + "</h2></div>" + stats +
+        '<p class="muted">' + (S.config.default ? "使用默认策略" : "不受限制") + "</p>" +
+        (view.limits?.length ? '<table><thead><tr><th>指标</th><th>周期</th><th>已用</th><th></th></tr></thead><tbody>' + view.limits.map((l) => "<tr><td>" + METRIC[l.metric] + "</td><td>" + WINDOW[l.window] + '</td><td class="usage">' + fmt(l.used, l.metric) + " / " + fmt(l.max, l.metric) + '</td><td class="act"><button type="button" data-reset="' + esc(l.id) + '">重置</button></td></tr>').join("") + "</tbody></table>" : "") +
+        '<div class="row mt16"><button type="button" class="primary" id="mkOwn">设置独立策略</button></div></div>';
+      root.querySelectorAll("[data-reset]").forEach((b) => b.addEventListener("click", () => setCounter(k.scope, b.dataset.reset, 0)));
+      $("mkOwn").addEventListener("click", () => {
+        S.draft = clone(S.config.default || {});
+        delete S.draft.label; S.draft.disabled = false;
+        drawOwn(root, k, live, stats, true);
+      });
+      return;
+    }
+    if (!S.draft) S.draft = clone(own);
+    drawOwn(root, k, live, stats, false);
+  }
+
+  function drawOwn(root, k, live, stats, isNew) {
+    policyEditor(root, S.draft, live, {
+      title: S.draft.label || k.mask,
+      headerExtra: k.stale ? '<span class="tag off">Key 已删除</span>' : "",
+      stats,
+      withLabel: true,
+      barExtra: (isNew ? "" : '<button type="button" class="danger" data-x="drop">移除独立策略</button><button type="button" data-x="resetAll">重置全部已用量</button><span class="grow"></span>'),
+      onDirty: () => {},
+      onDiscard: () => { S.draft = null; renderKey(); },
+      onCounter: isNew ? null : (id, v) => setCounter(k.scope, id, v),
+      onSave: () => { const d = clone(S.draft); saveConfig((c) => { c.policies[k.scope] = d; }); },
+    });
+    root.querySelector('[data-x="drop"]')?.addEventListener("click", () => {
+      if (!confirm("移除后此 Key " + (S.config.default ? "改用默认策略" : "不再受限") + "，确定？")) return;
+      saveConfig((c) => { delete c.policies[k.scope]; }, "已移除");
+    });
+    root.querySelector('[data-x="resetAll"]')?.addEventListener("click", () => setCounter(k.scope, "", 0));
+  }
+
+  let defaultDraft = null;
+  function renderDefault() {
+    const root = $("tab-default");
+    defaultDraft = clone(S.config.default || {});
+    const enabled = !!S.config.default;
+    policyEditor(root, defaultDraft, {}, {
+      title: "默认策略",
+      stats: '<p class="muted">对没有独立策略的 Key 生效，每个 Key 单独计量。</p><label class="row my8"><input type="checkbox" id="defOn"' + (enabled ? " checked" : "") + "> 启用</label>",
+      withLabel: false,
+      onDirty: () => {},
+      onDiscard: () => renderDefault(),
+      onSave: () => {
+        const on = $("defOn").checked, d = clone(defaultDraft);
+        saveConfig((c) => { if (on) c.default = d; else delete c.default; });
+      },
+    });
+  }
+
+  function renderPricing() {
+    const tb = $("priceRows");
+    tb.innerHTML = "";
+    S.config.pricing.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td><input data-k="pattern" list="models" placeholder="模型名或通配符"></td>' +
+        ["input", "output", "cache_read", "cache_write"].map((k) => '<td class="n"><input data-k="' + k + '" type="number" min="0" step="any"></td>').join("") +
+        '<td class="act"><button type="button" class="danger" aria-label="删除价格">删除</button></td>';
+      tr.querySelectorAll("input").forEach((inp) => {
+        const k = inp.dataset.k;
+        inp.value = r[k] ?? "";
+        inp.addEventListener("input", () => { r[k] = k === "pattern" ? inp.value : Number(inp.value) || 0; });
+      });
+      tr.querySelector("button").addEventListener("click", () => { S.config.pricing.splice(i, 1); renderPricing(); });
+      tb.appendChild(tr);
+    });
+    if (!S.config.pricing.length) tb.innerHTML = '<tr><td colspan="6" class="muted">未设置</td></tr>';
+  }
+
+  $("addPrice").addEventListener("click", () => { S.config.pricing.push({ pattern: "", input: 0, output: 0, cache_read: 0, cache_write: 0 }); ensureDatalist(); renderPricing(); });
+  $("savePricing").addEventListener("click", () => { const p = clone(S.config.pricing); saveConfig((c) => { c.pricing = p; }); });
+  $("filter").addEventListener("input", renderList);
+  $("reload").addEventListener("click", () => { if (S.draft && !confirm("放弃未保存的修改？")) return; refresh(true).catch((e) => toast(e.message, true)); });
+  document.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => {
+    S.tab = b.dataset.tab;
+    document.querySelectorAll("[data-tab]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    for (const t of ["keys", "default", "pricing"]) $("tab-" + t).hidden = t !== S.tab;
+  }));
+
+  async function start(token) {
+    S.token = token;
+    try {
+      await refresh(false);
+      $("login").hidden = true; $("app").hidden = false;
+    } catch (e) {
+      S.token = "";
+      $("app").hidden = true; $("login").hidden = false;
+      const err = $("loginErr");
+      err.textContent = e.status === 401 ? "管理密钥无效" : e.message; err.hidden = false;
+    }
+  }
+  $("connect").addEventListener("click", () => { const v = $("mgmt").value.trim(); $("mgmt").value = ""; if (v) start(v); });
+  $("mgmt").addEventListener("keydown", (e) => { if (e.key === "Enter") $("connect").click(); });
+
+  const k = sessionKey();
+  if (k) start(k); else $("login").hidden = false;
+})();
+</script>
+</body>
+</html>
